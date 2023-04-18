@@ -16,19 +16,26 @@ end
 local function dock()
   turtle.forward()
   turtle.turnLeft()
-  while locate().y ~= loader_pos.y do
+
+  local dy = locate().y - loader_pos.y
+  local dx = locate().x - loader_pos.x
+
+  for _ = 1, math.abs(dy) do
     turtle.down()
   end
-  while locate().x ~= loader_pos.x do
+  for _ = 1, math.abs(dx) do
     turtle.forward()
   end
 end
 
 local function recall()
-  while locate().x ~= initial_pos.x do
+  local dy = locate().y - initial_pos.y
+  local dx = locate().x - initial_pos.x
+
+  for _ = 1, math.abs(dx) do
     turtle.back()
   end
-  while locate().y ~= initial_pos.y do
+  for _ = 1, math.abs(dy) do
     turtle.up()
   end
   turtle.turnRight()
