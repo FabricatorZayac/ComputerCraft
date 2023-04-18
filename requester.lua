@@ -1,4 +1,5 @@
-local initial_pos = {gps.locate(5)}
+local initial_pos = {}
+initial_pos.x, initial_pos.z, initial_pos.y = gps.locate(5)
 local loader_pos = {x = 268, z = 450, y = 60}
 
 local items = {
@@ -53,15 +54,13 @@ local function request(req)
 end
 
 local function main()
-  if rednet.isOpen("right") == false then
-    rednet.open("right")
-  end
+  rednet.open("right")
   while true do
     local _, _, message_json = os.pullEvent("rednet_message")
     local message = json.unstringify(message_json)
     if type(items[message.item]) == "number" then
       dock()
-      request({items[message.item], message.count})
+      request({slot = items[message.item], count = message.count})
       recall()
     end
   end
