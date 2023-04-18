@@ -56,7 +56,8 @@ local function main()
     rednet.open("right")
   end
   while true do
-    local message = json.unstringify(os.pullEvent("rednet_message"))
+    local _, _, message_json = os.pullEvent("rednet_message")
+    local message = json.unstringify(message_json)
     if type(items[message.item]) == "number" then
       dock()
       request({items[message.item], message.count})
