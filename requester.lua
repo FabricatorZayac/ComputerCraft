@@ -8,7 +8,7 @@ local items = {
 }
 
 local function locate()
-  local x, y, z = gps.locate(5)
+  local x, z, y = gps.locate(5)
   return {x = x, y = y, z = z}
 end
 
@@ -40,11 +40,12 @@ local function request(req)
   turtle.drop()
   for _ = 1, req.count do
     rs.setOutput("top", true)
+    sleep(0.2)
     rs.setOutput("top", false)
-    sleep(0.05)
+    sleep(0.2)
   end
   rs.setOutput("bottom", true)
-  sleep(0.05)
+  sleep(0.2)
   rs.setOutput("bottom", false)
   while turtle.getItemCount(req.slot) ~= 1 do
     sleep(1)
