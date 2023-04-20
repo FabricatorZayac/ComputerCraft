@@ -1,17 +1,29 @@
-local initial_pos = {}
-initial_pos.x, initial_pos.z, initial_pos.y = gps.locate(5)
+---@diagnostic disable: undefined-global
+local message = require("message")
+local Message = message.Message
+local Queue = require("queue")
+
+local event_queue = Queue.new()
+
+local function listen()
+  while true do
+    event_queue:push({rednet.receive()})
+  end
+end
+
+local function locate()
+  local x, z, y = gps.locate(5)
+  return {x = x, z = z, y = y}
+end
+
+local initial_pos = locate()
 local loader_pos = {x = 268, z = 450, y = 60}
 
 local items = {
     ingotIron = 1, nil, nil,
-    nil,         nil, nil,
-    nil,         nil, nil,
+    nil,           nil, nil,
+    nil,           nil, nil,
 }
-
-local function locate()
-  local x, z, y = gps.locate(5)
-  return {x = x, y = y, z = z}
-end
 
 local function dock()
   turtle.forward()
@@ -60,17 +72,40 @@ local function request(req)
   end
 end
 
+local function getMessage()
+  while event_queue:isEmpty() do
+    sleep(1)
+  end
+  return json.unstringify(event_queue:pop()[2])
+end
+
+local function containsFilter(item)
+  return type(items[item]) == "number"
+end
+
 local function main()
   rednet.open("right")
   while true do
-    local _, _, message_json = os.pullEvent("rednet_message")
-    local message = json.unstringify(message_json)
-    if type(items[message.item]) == "number" then
+    local msg = getMessage()
+    if msg.msg == Message.SEMAPHORE_LOCK then
+      while true do
+        msg = getMessage()
+        if msg.msg == Message.SEMAPHORE_UNLOCK then break end
+      end
+    elseif msg.msg == Message.ITEM_REQUEST and containsFilter(msg.body.item) then
+      rednet.broadcast(message.json(Message.SEMAPHORE_LOCK))
       dock()
-      request({slot = items[message.item], count = message.count})
+      repeat
+        request({
+          slot = items[msg.body.item],
+          count = msg.body.count
+        })
+        msg = getMessage()
+      until not containsFilter(msg.body.item)
       recall()
+      rednet.broadcast(message.json(Message.SEMAPHORE_UNLOCK))
     end
   end
 end
 
-main()
+parallel.waitForAll(listen, main)
