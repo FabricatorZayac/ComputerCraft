@@ -57,3 +57,19 @@ assert(quux:match {
 assert(getmetatable(Foo) == "enum")
 assert(getmetatable(Foo.BAR) == "variant")
 assert(getmetatable(Foo.BAR()) == "variant_instance")
+
+local garply = Enum.fromtable {
+  label = "BAR",
+  body = {
+    foo = 5
+  },
+}
+
+assert(garply:match {
+  BAR = {
+    {"foo"},
+    function (x)
+      return x - 3
+    end
+  },
+} == 2)

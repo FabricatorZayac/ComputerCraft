@@ -1,5 +1,27 @@
 Enum = {}
 
+---@param self table
+---@param branches table
+---@return unknown
+function Enum.match(self, branches)
+  local expr = branches[self.label]
+  if type(expr) == "function" then
+    if type(self.body) == "table" then
+      return expr(unpack(self.body))
+    else
+      return expr(self.body)
+    end
+  elseif type(expr) == "table" and type(self.body) == "table" then
+    local args = {}
+    for _, i in ipairs(expr[1]) do
+      table.insert(args, self.body[i])
+    end
+    return expr[#expr](unpack(args))
+  else
+    return expr
+  end
+end
+
 ---@param tab table 
 ---@return table
 function Enum.def(tab)
@@ -14,25 +36,8 @@ function Enum.def(tab)
         local instance = {
           label = v,
           body = body,
+          match = Enum.match,
         }
-        function instance:match(branches)
-          local expr = branches[self.label]
-          if type(expr) == "function" then
-            if type(self.body) == "table" then
-              return expr(unpack(self.body))
-            else
-              return expr(self.body)
-            end
-          elseif type(expr) == "table" and type(self.body) == "table" then
-            local args = {}
-            for _, i in pairs(expr[1]) do
-              table.insert(args, self.body[i])
-            end
-            return expr[#expr](unpack(args))
-          else
-            return expr
-          end
-        end
         return setmetatable(instance, {
           __metatable = "variant_instance",
         })
@@ -56,6 +61,13 @@ function Enum.def(tab)
     end,
   }
   return setmetatable({}, enum_meta)
+end
+
+---@param tab table
+---@return table
+function Enum.fromtable(tab)
+  tab.match = Enum.match
+  return tab
 end
 
 return setmetatable(Enum, {
