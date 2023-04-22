@@ -1,17 +1,8 @@
-local enum = require("enum").enum
+local enum = require("enum")
 
-Message = enum {
-  ITEM_REQUEST = 1,
-  SEMAPHORE_LOCK = 2,
-  SEMAPHORE_UNLOCK = 3,
+return enum {
+  "ITEM_REQUEST",
+  "SEMAPHORE_LOCK",
+  "SEMAPHORE_UNLOCK",
 }
 
-return {
-  Message = Message,
-  json = function(msg, body)
-    return json.stringify({
-      msg = msg,
-      body = body,
-    })
-  end,
-}

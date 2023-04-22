@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global
-local message = require("message")
-local Message = message.Message
+local Message = require("message")
 local Queue = require("queue")
+local enum = require("enum")
 
 local event_queue = Queue.new()
 
@@ -76,35 +76,42 @@ local function getMessage()
   while event_queue:isEmpty() do
     sleep(1)
   end
-  return json.unstringify(event_queue:pop()[2])
+  return enum.fromtable(json.unstringify(event_queue:pop()[2]))
 end
 
 local function containsFilter(item)
   return type(items[item]) == "number"
 end
 
+local function wait_for_unlock()
+  repeat until getMessage():match { SEMAPHORE_UNLOCK = true }
+end
+
 local function main()
   rednet.open("right")
   while true do
     local msg = getMessage()
-    if msg.msg == Message.SEMAPHORE_LOCK then
-      while true do
-        msg = getMessage()
-        if msg.msg == Message.SEMAPHORE_UNLOCK then break end
-      end
-    elseif msg.msg == Message.ITEM_REQUEST and containsFilter(msg.body.item) then
-      rednet.broadcast(message.json(Message.SEMAPHORE_LOCK))
-      dock()
-      repeat
-        request({
-          slot = items[msg.body.item],
-          count = msg.body.count
-        })
-        msg = getMessage()
-      until not containsFilter(msg.body.item)
-      recall()
-      rednet.broadcast(message.json(Message.SEMAPHORE_UNLOCK))
-    end
+    msg:match {
+      SEMAPHORE_LOCK = wait_for_unlock(),
+      ITEM_REQUEST = {
+        {"item", "count"},
+        function (item, count)
+          if not containsFilter(item) then return end
+          rednet.broadcast(json.stringify(Message.SEMAPHORE_LOCK()))
+          dock()
+          while true do
+            request({
+              slot = items[item],
+              count = count
+            })
+            if event_queue:isEmpty() then break end
+            msg = event_queue:pop()
+          end
+          recall()
+          rednet.broadcast(json.stringify(Message.SEMAPHORE_UNLOCK()))
+        end,
+      },
+    }
   end
 end
 
