@@ -16,7 +16,7 @@ assert(baz.body[1] == 5)
 assert(baz.body[2] == 6)
 assert(baz.body[3] == 7)
 
-assert(baz:switch {
+assert(baz:match {
   BAZ = function (_, b, _)
     return b + 5
   end
@@ -32,18 +32,23 @@ assert(qux.label == "QUX")
 assert(qux.body.foo == "qwerty")
 assert(qux.body.bar.baz == "asdf")
 
-assert(qux:switch {
+assert(qux:match {
   BAR = 1,
   BAZ = 2,
-  QUX = qux.body.foo .. 5,
+  QUX = {
+    {"foo", "bar"},
+    function (x, y)
+      return x .. 5 .. y.baz
+    end,
+  },
   QUUX = 4,
-} == "qwerty5")
+} == "qwerty5asdf")
 
 local quux = Foo.QUUX(5)
 assert(quux.label == "QUUX")
 assert(quux.body == 5)
 
-assert(quux:switch {
+assert(quux:match {
   QUUX = function (q)
     return q + 5
   end

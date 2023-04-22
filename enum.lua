@@ -15,15 +15,23 @@ function Enum.def(tab)
           label = v,
           body = body,
         }
-        function instance:switch(branches)
+        function instance:match(branches)
           local expr = branches[self.label]
           if type(expr) == "function" then
             if type(self.body) == "table" then
               return expr(unpack(self.body))
+            else
+              return expr(self.body)
             end
-            return expr(self.body)
+          elseif type(expr) == "table" and type(self.body) == "table" then
+            local args = {}
+            for _, i in pairs(expr[1]) do
+              table.insert(args, self.body[i])
+            end
+            return expr[#expr](unpack(args))
+          else
+            return expr
           end
-          return expr
         end
         return setmetatable(instance, {
           __metatable = "variant_instance",
