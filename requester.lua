@@ -1,7 +1,6 @@
----@diagnostic disable: undefined-global
 local Message = require("message")
 local Queue = require("queue")
-local enum = require("enum")
+local json = require("json")
 
 local event_queue = Queue.new()
 
@@ -73,10 +72,8 @@ local function request(req)
 end
 
 local function getMessage()
-  while event_queue:isEmpty() do
-    sleep(1)
-  end
-  return enum.fromtable(json.unstringify(event_queue:pop()[2]))
+  repeat until not event_queue:isEmpty()
+  return Message.fromtable(json.decode(event_queue:pop()[2]))
 end
 
 local function containsFilter(item)
@@ -97,7 +94,7 @@ local function main()
         {"item", "count"},
         function (item, count)
           if not containsFilter(item) then return end
-          rednet.broadcast(json.stringify(Message.SEMAPHORE_LOCK()))
+          rednet.broadcast(json.encode(Message.SEMAPHORE_LOCK()))
           dock()
           while true do
             request({
@@ -108,7 +105,7 @@ local function main()
             msg = event_queue:pop()
           end
           recall()
-          rednet.broadcast(json.stringify(Message.SEMAPHORE_UNLOCK()))
+          rednet.broadcast(json.encode(Message.SEMAPHORE_UNLOCK()))
         end,
       },
     }

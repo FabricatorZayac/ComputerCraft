@@ -8,19 +8,16 @@ Foo = enum {
 }
 
 local bar = Foo.BAR()
-assert(bar.label == "BAR")
+assert(bar:match {
+  BAR = 6
+} == 6)
 
 local baz = Foo.BAZ({5, 6, 7})
-assert(baz.label == "BAZ")
-assert(baz.body[1] == 5)
-assert(baz.body[2] == 6)
-assert(baz.body[3] == 7)
-
 assert(baz:match {
-  BAZ = function (_, b, _)
-    return b + 5
+  BAZ = function (a, b, _)
+    return b + 5 + a
   end
-} == 11)
+} == 16)
 
 local qux = Foo.QUX {
   foo = "qwerty",
@@ -28,10 +25,6 @@ local qux = Foo.QUX {
     baz = "asdf",
   },
 }
-assert(qux.label == "QUX")
-assert(qux.body.foo == "qwerty")
-assert(qux.body.bar.baz == "asdf")
-
 assert(qux:match {
   BAR = 1,
   BAZ = 2,
@@ -45,9 +38,6 @@ assert(qux:match {
 } == "qwerty5asdf")
 
 local quux = Foo.QUUX(5)
-assert(quux.label == "QUUX")
-assert(quux.body == 5)
-
 assert(quux:match {
   QUUX = function (q)
     return q + 5
@@ -59,8 +49,7 @@ assert(getmetatable(Foo.BAR) == "variant")
 assert(getmetatable(Foo.BAR()) == "variant_instance")
 
 local garply = Enum.fromtable {
-  label = "BAR",
-  body = {
+  BAR = {
     foo = 5
   },
 }

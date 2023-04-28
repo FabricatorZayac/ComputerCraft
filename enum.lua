@@ -4,17 +4,23 @@ Enum = {}
 ---@param branches table
 ---@return unknown
 function Enum.match(self, branches)
-  local expr = branches[self.label]
-  if type(expr) == "function" then
-    if type(self.body) == "table" then
-      return expr(unpack(self.body))
-    else
-      return expr(self.body)
+  local label, body
+  for k, v in pairs(self) do
+    if k ~= "match" then
+      label, body = k, v
     end
-  elseif type(expr) == "table" and type(self.body) == "table" then
+  end
+  local expr = branches[label]
+  if type(expr) == "function" then
+    if type(body) == "table" then
+      return expr(unpack(body))
+    else
+      return expr(body)
+    end
+  elseif type(expr) == "table" and type(body) == "table" then
     local args = {}
     for _, i in ipairs(expr[1]) do
-      table.insert(args, self.body[i])
+      table.insert(args, body[i])
     end
     return expr[#expr](unpack(args))
   else
@@ -22,20 +28,26 @@ function Enum.match(self, branches)
   end
 end
 
----@param tab table 
+---@param tab table
+---@return table
+function Enum.fromtable(tab)
+  tab.match = Enum.match
+  return tab
+end
+
+---@param tab table
 ---@return table
 function Enum.def(tab)
   if type(tab) ~= "table" then
     error("Expected table, received " .. type(tab))
   end
   local enum = {}
-  for _, v in pairs(tab) do
+  for _, label in pairs(tab) do
     local variant_meta = {
       __metatable = "variant",
       __call = function (_, body)
         local instance = {
-          label = v,
-          body = body,
+          [label] = body or "",
           match = Enum.match,
         }
         return setmetatable(instance, {
@@ -43,9 +55,9 @@ function Enum.def(tab)
         })
       end,
     }
-    local variant = {v}
+    local variant = {label}
     setmetatable(variant, variant_meta)
-    enum[v] = variant
+    enum[label] = variant
   end
   local enum_meta = {
     __metatable = "enum",
@@ -60,14 +72,9 @@ function Enum.def(tab)
       error("Attempted to modify enum definition " .. key)
     end,
   }
-  return setmetatable({}, enum_meta)
-end
-
----@param tab table
----@return table
-function Enum.fromtable(tab)
-  tab.match = Enum.match
-  return tab
+  return setmetatable({
+    fromtable = Enum.fromtable
+  }, enum_meta)
 end
 
 return setmetatable(Enum, {
