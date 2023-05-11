@@ -13,6 +13,7 @@ local function flush()
     turtle.select(i)
     turtle.dropDown()
   end
+  turtle.select(1)
 end
 
 local function main()
