@@ -6,12 +6,26 @@ local dir = enum {
   "DOWN",
 }
 
+local function dropAll()
+  local initialSlot = turtle.getSelectedSlot()
+  for i = 1, 16 do
+    turtle.select(i)
+    turtle.drop()
+  end
+  turtle.select(initialSlot)
+end
+
 local function isLog(direction)
-  return ({direction:match {
+  local blockExists, info = direction:match {
     FORWARD = turtle.inspect,
     UP = turtle.inspectUp,
     DOWN = turtle.inspectDown,
-  }})[2].info.tags["minecraft:logs"]
+  }
+  if blockExists then
+    return info.tags["minecraft:logs"]
+  else
+    return false
+  end
 end
 
 local function chopUp()
@@ -47,7 +61,12 @@ local function chop()
   turtle.forward()
   turtle.turnRight()
   turtle.forward()
-  turtle.turnRight()
+  turtle.turnLeft()
+  turtle.forward()
+  dropAll()
+  turtle.turnLeft()
+  turtle.turnLeft()
+  turtle.forward()
 end
 
 local function mainloop()
