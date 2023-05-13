@@ -8,23 +8,13 @@ local function spread(n_items, n_furnaces)
   end
 end
 
-local function flush()
-  for i = 1, 16 do
-    turtle.select(i)
-    turtle.dropDown()
-  end
-  turtle.select(1)
-end
-
 local function main()
   while true do
     turtle.select(1)
-    if turtle.getItemCount() >= 64 then
-      spread(64, 8)
-      flush()
-    end
     turtle.suckDown()
-    sleep(5)
+    if turtle.getItemCount() == 64 then
+      spread(64, 8)
+    end
   end
 end
 
