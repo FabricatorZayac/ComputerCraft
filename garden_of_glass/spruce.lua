@@ -22,6 +22,7 @@ local function chopUp()
 end
 
 local function chopDown()
+  turtle.digUp()
   while isLog(dir.DOWN) do
     turtle.digDown()
     turtle.down()
