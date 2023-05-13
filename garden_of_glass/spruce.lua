@@ -15,7 +15,7 @@ local function isLog(direction)
 end
 
 local function chopUp()
-  while isLog(dir.UP) do
+  while isLog(dir.UP()) do
     turtle.digUp()
     turtle.up()
   end
@@ -23,7 +23,7 @@ end
 
 local function chopDown()
   turtle.digUp()
-  while isLog(dir.DOWN) do
+  while isLog(dir.DOWN()) do
     turtle.digDown()
     turtle.down()
   end
@@ -51,7 +51,7 @@ local function chop()
 end
 
 local function mainloop()
-  if isLog(dir.FORWARD) then
+  if isLog(dir.FORWARD()) then
     chop()
   end
 end
