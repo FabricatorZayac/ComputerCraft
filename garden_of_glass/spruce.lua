@@ -93,7 +93,21 @@ local function chop()
   turtle.forward()
 end
 
+local function refuel()
+  turtle.turnLeft()
+  turtle.forward()
+  turtle.forward()
+  turtle.suck()
+  turtle.refuel()
+  turtle.back()
+  turtle.back()
+  turtle.turnRight()
+end
+
 local function mainloop()
+  if turtle.getFuelLevel() < 500 then
+    refuel()
+  end
   if isLog(dir.FORWARD()) then
     chop()
   end
