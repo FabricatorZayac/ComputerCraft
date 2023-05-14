@@ -9,7 +9,8 @@ local dir = enum {
 local function dropAll(id)
   for i = 1, 16 do
     turtle.select(i)
-    if turtle.getItemDetail().name == id then
+    local itemDetail = turtle.getItemDetail()
+    if itemDetail and itemDetail.name == id then
       turtle.drop()
     end
   end
@@ -18,7 +19,8 @@ end
 local function hasInInventory(id)
   for i = 1, 16 do
     turtle.select(i)
-    if turtle.getItemDetail().name == id then
+    local itemDetail = turtle.getItemDetail()
+    if itemDetail and itemDetail.name == id then
       return true;
     end
   end
