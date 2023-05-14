@@ -6,13 +6,23 @@ local dir = enum {
   "DOWN",
 }
 
-local function dropAll()
-  local initialSlot = turtle.getSelectedSlot()
+local function dropAll(id)
   for i = 1, 16 do
     turtle.select(i)
-    turtle.drop()
+    if turtle.getItemDetail().name == id then
+      turtle.drop()
+    end
   end
-  turtle.select(initialSlot)
+end
+
+local function hasInInventory(id)
+  for i = 1, 16 do
+    turtle.select(i)
+    if turtle.getItemDetail().name == id then
+      return true;
+    end
+  end
+  return false
 end
 
 local function isLog(direction)
@@ -74,7 +84,9 @@ local function chop()
   turtle.forward()
   chopDown()
   turtle.forward()
-  dropAll()
+  while hasInInventory("minecraft:spruce_log") do
+    dropAll("minecraft:spruce_log")
+  end
   turtle.turnRight()
   turtle.forward()
   turtle.turnLeft()
@@ -87,9 +99,14 @@ local function chop()
   turtle.turnLeft()
   turtle.turnLeft()
   turtle.forward()
-  turtle.drop()
-  turtle.turnLeft()
-  turtle.turnLeft()
+  while hasInInventory("minecraft:spruce_sapling") do
+    dropAll("minecraft:spruce_sapling")
+  end
+  turtle.turnRight()
+  while hasInInventory("minecraft:stick") do
+    dropAll("minecraft:stick")
+  end
+  turtle.turnRight()
   turtle.forward()
 end
 
