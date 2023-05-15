@@ -37,21 +37,21 @@ end
 
 ---@param tab table
 ---@return table
-function Enum.def(tab)
+local function def(tab)
   if type(tab) ~= "table" then
     error("Expected table, received " .. type(tab))
   end
   local enum = {}
   for _, label in pairs(tab) do
     local variant_meta = {
-      __metatable = "variant",
+      __metatable = "enum_variant",
       __call = function (_, body)
         local instance = {
           [label] = body or "",
           match = Enum.match,
         }
         return setmetatable(instance, {
-          __metatable = "variant_instance",
+          __metatable = "enum_variant_instance",
         })
       end,
     }
@@ -79,6 +79,6 @@ end
 
 return setmetatable(Enum, {
   __call = function (_, tab)
-    return Enum.def(tab)
+    return def(tab)
   end
 })

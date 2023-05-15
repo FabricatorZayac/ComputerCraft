@@ -45,8 +45,8 @@ assert(quux:match {
 } == 10)
 
 assert(getmetatable(Foo) == "enum")
-assert(getmetatable(Foo.BAR) == "variant")
-assert(getmetatable(Foo.BAR()) == "variant_instance")
+assert(getmetatable(Foo.BAR) == "enum_variant")
+assert(getmetatable(Foo.BAR()) == "enum_variant_instance")
 
 local garply = Enum.fromtable {
   BAR = {
