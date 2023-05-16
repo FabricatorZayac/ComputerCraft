@@ -1,16 +1,32 @@
 local enum = require("enum")
 
 local dir = enum {
-  "FORWARD",
+  "FRONT",
   "UP",
   "DOWN",
 }
 
-local function dropAll(id)
+local function peripheralExists(direction)
+  return direction:match {
+    FRONT = function ()
+      for _, i in ipairs(peripheral.getNames()) do
+        if i == "front" then
+          return true
+        end
+      end
+      return false
+    end,
+  }
+end
+
+local function dropAll(id, unload)
   for i = 1, 16 do
     turtle.select(i)
     local itemDetail = turtle.getItemDetail()
     if itemDetail and itemDetail.name == id then
+      if unload then
+        repeat until peripheralExists(dir.FRONT())
+      end
       turtle.drop()
     end
   end
@@ -29,7 +45,7 @@ end
 
 local function isLog(direction)
   local blockExists, info = direction:match {
-    FORWARD = turtle.inspect,
+    FRONT = turtle.inspect,
     UP = turtle.inspectUp,
     DOWN = turtle.inspectDown,
   }
@@ -86,11 +102,10 @@ local function chop()
   turtle.forward()
   chopDown()
   turtle.forward()
-  while hasInInventory("minecraft:spruce_log") do
-    dropAll("minecraft:spruce_log")
-  end
+  dropAll("minecraft:spruce_log", true)
   turtle.turnRight()
   turtle.forward()
+  dropAll("minecraft:stick")
   turtle.turnLeft()
   turtle.forward()
   turtle.suck()
@@ -101,13 +116,8 @@ local function chop()
   turtle.turnLeft()
   turtle.turnLeft()
   turtle.forward()
-  while hasInInventory("minecraft:spruce_sapling") do
-    dropAll("minecraft:spruce_sapling")
-  end
+  dropAll("minecraft:spruce_sapling", true)
   turtle.turnRight()
-  while hasInInventory("minecraft:stick") do
-    dropAll("minecraft:stick")
-  end
   turtle.turnRight()
   turtle.forward()
 end
@@ -127,7 +137,7 @@ local function mainloop()
   if turtle.getFuelLevel() < 500 then
     refuel()
   end
-  if isLog(dir.FORWARD()) then
+  if isLog(dir.FRONT()) then
     chop()
   end
 end
