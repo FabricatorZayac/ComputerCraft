@@ -1,6 +1,6 @@
 local enum = require("enum")
 
-Foo = enum {
+local Foo = enum {
   "BAR",
   "BAZ",
   "QUX",

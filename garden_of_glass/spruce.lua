@@ -25,7 +25,7 @@ local function dropAll(id, unload)
     local itemDetail = turtle.getItemDetail()
     if itemDetail and itemDetail.name == id then
       if unload then
-        repeat until peripheralExists(dir.FRONT())
+        repeat sleep(1) until peripheralExists(dir.FRONT())
       end
       turtle.drop()
     end
