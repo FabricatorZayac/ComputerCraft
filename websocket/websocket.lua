@@ -1,5 +1,7 @@
 local json = require("json")
 
+local trunkId = 0;
+
 local ws, err = http.websocket("ws://diaco.strangled.net:4444", { id = "trunk" })
 
 local function log(str)
@@ -10,7 +12,12 @@ end
 if err then
   print(err)
 else
-  log("[INFO] CONNECTED")
+  print("[INFO] CONNECTED")
+  ws.send(json.encode({
+    messageType = "JOIN",
+    trunkId = trunkId,
+  }))
+
   local running = true
   while running do
     local msg = json.decode(ws.receive())
